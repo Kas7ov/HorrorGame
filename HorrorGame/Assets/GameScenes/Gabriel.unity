@@ -1106,10 +1106,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -1127,7 +1127,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 0
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 2135643416}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -1222,7 +1222,6 @@ GameObject:
   - component: {fileID: 2135643415}
   - component: {fileID: 2135643418}
   - component: {fileID: 2135643419}
-  - component: {fileID: 2135643420}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1452,121 +1451,25 @@ MonoBehaviour:
   m_GameObject: {fileID: 2135643414}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97f0b500c05823f46903a86565bbebb4, type: 3}
+  m_Script: {fileID: 11500000, guid: 704b1cbf694c6514b9ddef11096a53ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rotationSpeed: 0.83
-  deadzone: 0.05
-  mouseFollowSpeed: 20
-  recenterSpeed: 5
-  virtualMouse: {x: 0, y: 0}
---- !u!114 &2135643420
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2135643414}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 424b6720ff5999446843ba414e58a907, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_CursorMode: 0
-  m_CursorGraphic: {fileID: 0}
-  m_CursorTransform: {fileID: 0}
-  m_CursorSpeed: 400
-  m_ScrollSpeed: 45
-  m_StickAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Stick
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: bb3e322a-e8a0-40be-89b0-cc16ab1b6078
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
-  m_LeftButtonAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Left Button
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 860fc8ce-c89a-4552-a0b0-8015a982689b
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
-  m_MiddleButtonAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Middle Button
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 480ec1c6-6b76-423e-987e-7ba43ed96a45
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
-  m_RightButtonAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Right Button
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 1650331d-c5c5-4946-bf0c-38284bb6682b
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
-  m_ForwardButtonAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Forward Button
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 79990164-ab86-44fc-9e4d-4080518bfa6e
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
-  m_BackButtonAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Back Button
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 109c252b-48d3-4ab9-ad95-2e302e4a6d97
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
-  m_ScrollWheelAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Scroll Wheel
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 407c4452-35f1-4f90-9141-f2d06de1fd25
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
+  virtualCursorUI: {fileID: 264794090}
+  mouseSensitivity: 10
+  cameraFollowSpeed: 2
+  minCameraSpeed: 0.2
+  maxCameraSpeed: 0.4
+  cursorReturnSpeed: 1.1
+  cameraAcceleration: 0.3
+  cursorReturnDelay: 0.1
+  maxDriftPercentage: 0.482
+  deadZonePercentage: 0.131
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 2135643417}
   - {fileID: 1046344182}
+  - {fileID: 2135643417}
   - {fileID: 1822045779}
   - {fileID: 848966864}
   - {fileID: 1686665013}

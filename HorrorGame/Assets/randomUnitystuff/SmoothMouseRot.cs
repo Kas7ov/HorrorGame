@@ -22,7 +22,6 @@ public class SmoothMouseRot : MonoBehaviour
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Confined;
-        //Cursor.visible = ;
         virtualMouse = Vector2.zero;
     }
 
@@ -33,20 +32,29 @@ public class SmoothMouseRot : MonoBehaviour
         float mouseYNormalized = (Input.mousePosition.y / Screen.height) * 2f - 1f;
         Vector2 target = new Vector2(mouseXNormalized, mouseYNormalized);
 
-        // 2. Update virtual mouse: follow physical cursor + recenter toward (0,0)
-        Vector2 followDelta = (target - virtualMouse) * mouseFollowSpeed;
+        // 2. If the physical cursor is inside the deadzone, don't pull virtual mouse toward it.
+        //    This lets recentering dominate and causes the virtual mouse to slowly drift back to center.
+        Vector2 followDelta = Vector2.zero;
+        if (target.magnitude > deadzone)
+        {
+            followDelta = (target - virtualMouse) * mouseFollowSpeed;
+        }
+
+        // 3. Recenter force always pulls virtual mouse toward zero (slower feel).
         Vector2 recenterDelta = -virtualMouse * recenterSpeed;
+
+        // 4. Combine and integrate
         Vector2 netDelta = followDelta + recenterDelta;
         virtualMouse += netDelta * Time.deltaTime;
 
-        // 3. Apply deadzone to prevent jitter
-        if (virtualMouse.magnitude < deadzone) virtualMouse = Vector2.zero;
+        // 5. Keep virtual mouse within -1..1 range and allow it to slowly decay to zero (no hard snap).
+        virtualMouse = Vector2.ClampMagnitude(virtualMouse, 1f);
 
-        // 4. Convert virtual mouse to rotation input
+        // 6. Convert virtual mouse to rotation input
         float turnX = virtualMouse.x * rotationSpeed * Time.deltaTime * 50f;
         float turnY = virtualMouse.y * rotationSpeed * Time.deltaTime * 50f;
 
-        // 5. Apply rotation with vertical clamp
+        // 7. Apply rotation with vertical clamp
         Vector3 currentRotation = transform.localEulerAngles;
         float newPitch = currentRotation.x;
         if (newPitch > 180f) newPitch -= 360f;
