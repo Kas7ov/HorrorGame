@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GoldenEyeCam : MonoBehaviour
+public class GoldenEye : MonoBehaviour
 {
     [Header("UI References")]
     [Tooltip("Assign the VirtualCursor UI Image from your Canvas here.")]
