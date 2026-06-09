@@ -7,6 +7,10 @@ public class GoldenEye : MonoBehaviour
     [Tooltip("Assign the VirtualCursor UI Image from your Canvas here.")]
     public RectTransform virtualCursorUI;
 
+    [Header("References")]
+    [Tooltip("Assign the Player GameObject here. When set, the player's Y will rotate based on camera yaw.")]
+    public GameObject player;
+
     [Header("Speeds")]
     [Tooltip("How sensitive the virtual cursor is to raw mouse movement.")]
     public float mouseSensitivity = 3f;
@@ -53,6 +57,7 @@ public class GoldenEye : MonoBehaviour
     private float deadZoneMagnitude;
 
     // Camera rotation trackers
+    // cameraYaw is used only when no player GameObject is assigned (legacy behavior).
     private float cameraYaw;
     private float cameraPitch;
 
@@ -140,14 +145,37 @@ public class GoldenEye : MonoBehaviour
             float dirX = (maxDriftPixelsX > 0f) ? Mathf.Clamp(offsetFromCenter.x / maxDriftPixelsX, -1f, 1f) : 0f;
             float dirY = (maxDriftPixelsY > 0f) ? Mathf.Clamp(offsetFromCenter.y / maxDriftPixelsY, -1f, 1f) : 0f;
 
-            // Apply rotation scaled by current (ramped) speed.
-            cameraYaw += dirX * currentCameraSpeed * Time.deltaTime * 100f;
+            // Compute yaw delta and pitch change.
+            float yawDelta = dirX * currentCameraSpeed * Time.deltaTime * 100f;
             cameraPitch -= dirY * currentCameraSpeed * Time.deltaTime * 100f;
             cameraPitch = Mathf.Clamp(cameraPitch, -80f, 80f);
+
+            // If a player GameObject is assigned, rotate its Y by the yaw delta and keep the camera's local yaw at 0
+            if (player != null)
+            {
+                // Preserve other rotation axes and modify only Y (local space)
+                Vector3 localEuler = player.transform.localEulerAngles;
+                localEuler.y += yawDelta;
+                player.transform.localEulerAngles = localEuler;
+            }
+            else
+            {
+                // Legacy behavior: apply yaw directly to this transform.
+                cameraYaw += yawDelta;
+            }
         }
 
-        // Apply rotation to the camera
-        transform.localRotation = Quaternion.Euler(cameraPitch, cameraYaw, 0f);
+        // Apply rotation to the camera:
+        // - If a player GameObject is assigned, the player's Y holds the yaw and the camera only uses pitch (local X).
+        // - Otherwise, apply both pitch and yaw to the camera transform as before.
+        if (player != null)
+        {
+            transform.localRotation = Quaternion.Euler(cameraPitch, 0f, 0f);
+        }
+        else
+        {
+            transform.localRotation = Quaternion.Euler(cameraPitch, cameraYaw, 0f);
+        }
 
         // 5. THE RETURN: If the player isn't forcing mouse movement and the delay expired, glide the cursor back to center
         // Use a speed that is highest when far from center and reduces as it gets closer:

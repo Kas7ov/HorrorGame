@@ -3,33 +3,32 @@ using UnityEngine;
 public class TurnAngle25 : MonoBehaviour
 {
     public GameObject player;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [Range(0f, 45f)]
+    public float angle = 25f;
+    [Tooltip("Degrees per second")]
+    public float rotationSpeed = 120f;
 
-    // Update is called once per frame
     void Update()
     {
+        if (player == null) return;
+
+        // Determine target X rotation based on input
+        float targetX = 0f;
         if (Input.GetKey(KeyCode.Q))
         {
-            // Set the rotation to -25 degrees on the X axis
-            var rotation = player.transform.rotation.eulerAngles;
-            rotation.x = -25f;
-            player.transform.rotation = Quaternion.Euler(rotation);
+            targetX = angle;
         }
         else if (Input.GetKey(KeyCode.E))
         {
-            // Set the rotation to -25 degrees on the X axis
-            var rotation = player.transform.rotation.eulerAngles;
-            rotation.x = 25f;
-            player.transform.rotation = Quaternion.Euler(rotation);
+            targetX = -angle;
         }
-        else
-        {
-            player.transform.rotation = Quaternion.Euler(0f, player.transform.rotation.eulerAngles.y, player.transform.rotation.eulerAngles.z);
-        }
-        
+
+        // Keep current Y and Z so other rotations are preserved
+        var current = player.transform.rotation;
+        var targetEuler = new Vector3(player.transform.rotation.eulerAngles.x, player.transform.rotation.eulerAngles.y,targetX);
+        var target = Quaternion.Euler(targetEuler);
+
+        // Smoothly rotate towards target
+        player.transform.rotation = Quaternion.RotateTowards(current, target, rotationSpeed * Time.deltaTime);
     }
 }

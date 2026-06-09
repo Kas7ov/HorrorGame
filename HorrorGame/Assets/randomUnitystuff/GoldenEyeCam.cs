@@ -44,6 +44,10 @@ public class GoldenEyeCam : MonoBehaviour
     [Range(0f, 0.25f)]
     public float deadZonePercentage = 0.12f;
 
+    [Header("Player Reference (optional)")]
+    [Tooltip("If set, the player's Y rotation will be driven by camera yaw. If empty, script will try to use the camera's parent transform.")]
+    public Transform playerTransform;
+
     // Runtime trackers
     private Vector2 virtualCursorPos;
     private Vector2 screenCenter;
@@ -73,14 +77,24 @@ public class GoldenEyeCam : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
 
+        // auto-assign playerTransform to parent if not set
+        if (playerTransform == null && transform.parent != null)
+            playerTransform = transform.parent;
+
         screenCenter = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
         virtualCursorPos = screenCenter;
 
         RecalculateDriftAndDeadzone();
 
-        Vector3 euler = transform.localRotation.eulerAngles;
-        cameraYaw = euler.y;
-        cameraPitch = euler.x;
+        // Initialize pitch from the camera's local X rotation
+        Vector3 camLocalEuler = transform.localRotation.eulerAngles;
+        cameraPitch = camLocalEuler.x;
+
+        // Initialize yaw from playerTransform if present, otherwise from camera local Y (legacy behaviour)
+        if (playerTransform != null)
+            cameraYaw = playerTransform.localRotation.eulerAngles.y;
+        else
+            cameraYaw = camLocalEuler.y;
     }
 
     void Update()
@@ -99,11 +113,21 @@ public class GoldenEyeCam : MonoBehaviour
         currentYawVel = Mathf.MoveTowards(currentYawVel, targetYawVel, cameraAcceleration * 100f * Time.deltaTime);
         currentPitchVel = Mathf.MoveTowards(currentPitchVel, targetPitchVel, cameraAcceleration * 100f * Time.deltaTime);
 
-        // 3) Apply angular velocity to camera every frame (camera now moves on its own, independent of cursor)
+        // 3) Apply angular velocity to camera every frame
         cameraYaw += currentYawVel * Time.deltaTime;
         cameraPitch -= currentPitchVel * Time.deltaTime;
         cameraPitch = Mathf.Clamp(cameraPitch, -80f, 80f);
-        transform.localRotation = Quaternion.Euler(cameraPitch, cameraYaw, 0f);
+
+        // If playerTransform is assigned, apply yaw to player and pitch to camera; otherwise keep legacy combined local rotation.
+        if (playerTransform != null)
+        {
+            playerTransform.localRotation = Quaternion.Euler(0f, cameraYaw, 0f);
+            transform.localRotation = Quaternion.Euler(cameraPitch, 0f, 0f);
+        }
+        else
+        {
+            transform.localRotation = Quaternion.Euler(cameraPitch, cameraYaw, 0f);
+        }
 
         // 4) Virtual cursor: it imitates camera motion.
         // Compute a target aim offset in pixels based on the current angular velocity relative to max camera speed.
