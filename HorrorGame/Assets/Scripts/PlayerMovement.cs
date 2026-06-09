@@ -63,6 +63,12 @@ public class PlayerMovement : MonoBehaviour
     [Tooltip("Extra ground raycast distance for slope detection.")]
     public float groundRaycastExtra = 0.5f;
 
+    [Header("Forward slope sampling (capsule-friendly)")]
+    [Tooltip("Distance ahead of the capsule to sample slope (helps with capsule geometry).")]
+    public float forwardSlopeCheckDistance = 0.6f;
+    [Tooltip("Vertical offset above sample point to start the spherecast.")]
+    public float forwardSampleUp = 0.3f;
+
     [Header("Slope movement tuning")]
     [Tooltip("How strongly slope affects walking/running speed (positive = faster downhill, slower uphill).")]
     public float slopeSpeedFactor = 0.6f;
@@ -198,21 +204,74 @@ public class PlayerMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// Raycasts down and returns the ground normal and hit info. Defaults to Vector3.up if nothing found.
+    /// Returns world-space bottom center position of the character (capsule).
+    /// This is used as a reliable start for ground sampling.
     /// </summary>
-    private bool GetGroundNormal(out Vector3 normal, out RaycastHit hitInfo)
+    private Vector3 GetFeetPosition()
+    {
+        // controller.center is local; transform.TransformPoint gives world
+        Vector3 worldCenter = transform.TransformPoint(controller.center);
+        float halfHeight = Mathf.Max(0f, controller.height * 0.5f - controller.radius);
+        return worldCenter - Vector3.up * halfHeight;
+    }
+
+    /// <summary>
+    /// Spherecasts down from a sample origin and returns whether we hit ground,
+    /// plus the hit normal and hitInfo. This function is tolerant to capsule shape
+    /// because we start near the feet and use the controller radius for the sphere.
+    /// </summary>
+    private bool SampleGroundAt(Vector3 sampleOrigin, out Vector3 normal, out RaycastHit hitInfo)
     {
         hitInfo = default;
         normal = Vector3.up;
-        RaycastHit hit;
-        Vector3 origin = transform.position + Vector3.up * 0.1f;
-        float maxDist = controller.height * 0.5f + groundRaycastExtra;
-        float radius = Mathf.Max(0.01f, controller.radius * 0.9f);
 
-        if (Physics.SphereCast(origin, radius, Vector3.down, out hit, maxDist, ~0, QueryTriggerInteraction.Ignore))
+        float radius = Mathf.Max(0.01f, controller.radius * 0.9f);
+        float maxDist = controller.height * 0.5f + groundRaycastExtra;
+        if (Physics.SphereCast(sampleOrigin + Vector3.up * forwardSampleUp, radius, Vector3.down, out hitInfo, maxDist, ~0, QueryTriggerInteraction.Ignore))
         {
-            normal = hit.normal;
-            hitInfo = hit;
+            normal = hitInfo.normal;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Samples ground under center and slightly forward in movement direction (capsule-friendly).
+    /// Returns the most relevant ground normal and hit based on movement direction.
+    /// </summary>
+    private bool SampleGroundForward(Vector3 moveDirection, float forwardDistance, out Vector3 groundNormal, out RaycastHit forwardHit)
+    {
+        groundNormal = Vector3.up;
+        forwardHit = default;
+
+        Vector3 feet = GetFeetPosition();
+
+        // center sample
+        Vector3 centerOrigin = feet + Vector3.up * 0.05f;
+        Vector3 centerNormal;
+        RaycastHit centerHit;
+        bool center = SampleGroundAt(centerOrigin, out centerNormal, out centerHit);
+
+        // forward sample
+        Vector3 forwardOffset = (moveDirection.sqrMagnitude > 0.001f) ? moveDirection.normalized * forwardDistance : transform.forward * forwardDistance;
+        Vector3 forwardOrigin = feet + forwardOffset + Vector3.up * 0.05f;
+        Vector3 fNormal;
+        RaycastHit fHit;
+        bool forward = SampleGroundAt(forwardOrigin, out fNormal, out fHit);
+
+        // choose forward sample if it exists and is steeper or if player is moving forward
+        if (forward)
+        {
+            groundNormal = fNormal;
+            forwardHit = fHit;
+            return true;
+        }
+
+        if (center)
+        {
+            groundNormal = centerNormal;
+            forwardHit = centerHit;
             return true;
         }
 
@@ -221,9 +280,10 @@ public class PlayerMovement : MonoBehaviour
 
     /// <summary>
     /// Handles crouch + slide logic.
-    /// - Slide starts when sprint+crouch pressed OR when sprint+crouch pressed while standing on a slope >= slopeSlideThresholdAngle.
-    /// - If sliding and the raycast detects a steep downhill, slope will accelerate the slide (so slide continues down slopes).
+    /// - Slide starts when sprint+crouch pressed while moving OR when sprint+crouch pressed while a forward raycast detects a slope >= threshold.
+    /// - If sliding and the raycast detects a downhill slope, slope will accelerate the slide (so slide continues down slopes).
     /// - If sliding wasn't started, slopes only modify walking speed (downhill faster, uphill slower).
+    /// This version samples forward ground to work with capsule colliders.
     /// </summary>
     private Vector3 HandleCrouchAndSlide(Vector3 moveDirection, float inputMagnitude, bool crouchHeld, bool crouchPressedDown, float baseMoveSpeed, bool isRunning)
     {
@@ -248,33 +308,29 @@ public class PlayerMovement : MonoBehaviour
             controller.center = Vector3.MoveTowards(controller.center, targetCenter, heightAdjustSpeed * Time.deltaTime);
         }
 
-        // Slope info
+        // Sample forward ground (capsule-friendly)
         Vector3 groundNormal = Vector3.up;
+        RaycastHit forwardHit;
+        bool groundFound = isGrounded && SampleGroundForward(moveDirection, forwardSlopeCheckDistance, out groundNormal, out forwardHit);
+        float slopeAngle = Vector3.Angle(groundNormal, Vector3.up);
         Vector3 downhill = Vector3.zero;
-        float slopeAngle = 0f;
-        RaycastHit hit;
-        if (isGrounded && GetGroundNormal(out groundNormal, out hit))
-        {
-            slopeAngle = Vector3.Angle(groundNormal, Vector3.up);
-            if (slopeAngle > slopeSlideThresholdAngle)
-                downhill = Vector3.ProjectOnPlane(Vector3.down, groundNormal).normalized;
-        }
+        if (groundFound && slopeAngle > slopeSlideThresholdAngle)
+            downhill = Vector3.ProjectOnPlane(Vector3.down, groundNormal).normalized;
 
         // Compute current horizontal speed estimate (used for slide-start tests)
         float currentHorizontalSpeed = baseMoveSpeed * inputMagnitude * (isCrouching ? crouchSpeedMultiplier : 1f);
+        bool hasMovementInput = inputMagnitude > 0.01f;
+        bool slopeAllowsStart = groundFound && slopeAngle >= slopeSlideThresholdAngle;
 
         // Slide start condition:
         // - sprint + crouch pressed while moving (existing behavior), OR
-        // - sprint + crouch pressed while standing on a sufficiently steep downhill slope (raycast detects slope)
-        bool slopeAllowsStart = slopeAngle >= slopeSlideThresholdAngle;
-        bool hasMovementInput = inputMagnitude > 0.01f;
-
+        // - sprint + crouch pressed while standing on a sufficiently steep downhill slope (forward sample detects slope)
         if (crouchPressedDown && !isSliding && isRunning && slideCooldownTimer <= 0f && (hasMovementInput || slopeAllowsStart) && isGrounded)
         {
             isSliding = true;
             slideTimer = slideDuration;
 
-            // slide direction: prefer downhill when standing on slope, otherwise player input direction
+            // slide direction: prefer downhill when forward sample shows slope, otherwise player input direction
             Vector3 slideDir;
             if (slopeAllowsStart && downhill.sqrMagnitude > 0.001f && !hasMovementInput)
                 slideDir = downhill; // start sliding down the slope even if player isn't pressing forward
@@ -283,16 +339,8 @@ public class PlayerMovement : MonoBehaviour
 
             slideVelocity = slideDir * (baseMoveSpeed * slideSpeedMultiplier);
 
-            // Project onto slope plane so movement follows the surface (includes vertical component)
+            // Project initial velocity onto slope plane so movement follows the surface (keeps vertical component)
             slideVelocity = Vector3.ProjectOnPlane(slideVelocity, groundNormal);
-
-            // ensure slide can't gain uphill component when starting
-            if (downhill.sqrMagnitude > 0.001f)
-            {
-                float d = Vector3.Dot(slideVelocity, downhill);
-                if (d < 0f)
-                    slideVelocity -= downhill * d;
-            }
 
             // enforce crouch visually
             isCrouching = true;
@@ -307,18 +355,21 @@ public class PlayerMovement : MonoBehaviour
             // Player retains limited control during slide (adds to slideVelocity)
             Vector3 inputContribution = moveDirection * baseMoveSpeed * controlDuringSlide;
 
-            // If on slope, accelerate along downhill direction so slide continues down
+            // If forward sample indicates downhill, accelerate along downhill direction so slide continues down
             if (downhill.sqrMagnitude > 0.001f)
             {
-                // add acceleration in downhill direction
                 slideVelocity += downhill * slopeSlideAcceleration * Time.deltaTime;
-                // re-project on plane so slideVelocity stays aligned with slope (keeps Y component)
                 slideVelocity = Vector3.ProjectOnPlane(slideVelocity, groundNormal);
 
-                // ensure no uphill component (don't allow slide to be steered uphill)
+                // avoid giving slide an uphill component
                 float dot = Vector3.Dot(slideVelocity, downhill);
                 if (dot < 0f)
                     slideVelocity -= downhill * dot;
+            }
+            else
+            {
+                // even without downhill, keep movement projected to ground to avoid climbing tiny bumps
+                slideVelocity = Vector3.ProjectOnPlane(slideVelocity, Vector3.up);
             }
 
             horizontalMove = slideVelocity + inputContribution;
@@ -377,7 +428,7 @@ public class PlayerMovement : MonoBehaviour
         return horizontalMove;
     }
 
-    // Editor gizmos to visualize ground raycast / slope used by sliding
+    // Editor gizmos to visualize ground sampling used for sliding (center + forward)
     void OnDrawGizmosSelected()
     {
         if (controller == null)
@@ -386,27 +437,17 @@ public class PlayerMovement : MonoBehaviour
             return;
 
         Gizmos.color = Color.yellow;
-        Vector3 origin = transform.position + Vector3.up * 0.1f;
-        float maxDist = controller.height * 0.5f + groundRaycastExtra;
-        float radius = Mathf.Max(0.01f, controller.radius * 0.9f);
+        Vector3 feet = GetFeetPosition();
+        Gizmos.DrawWireSphere(feet + Vector3.up * forwardSampleUp, Mathf.Max(0.01f, controller.radius * 0.9f));
+        Gizmos.DrawLine(feet + Vector3.up * forwardSampleUp, feet + Vector3.up * forwardSampleUp + Vector3.down * (controller.height * 0.5f + groundRaycastExtra));
 
-        // draw spherecast origin & vertical trace
-        Gizmos.DrawWireSphere(origin, radius);
-        Gizmos.DrawLine(origin, origin + Vector3.down * maxDist);
+        Vector3 forwardOrigin = feet + transform.forward * forwardSlopeCheckDistance + Vector3.up * forwardSampleUp;
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(forwardOrigin, Mathf.Max(0.01f, controller.radius * 0.9f));
+        Gizmos.DrawLine(forwardOrigin, forwardOrigin + Vector3.down * (controller.height * 0.5f + groundRaycastExtra));
 
-        RaycastHit hit;
-        if (Physics.SphereCast(origin, radius, Vector3.down, out hit, maxDist, ~0, QueryTriggerInteraction.Ignore))
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawSphere(hit.point, 0.05f);
-
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawLine(hit.point, hit.point + hit.normal * 0.5f); // ground normal
-
-            // draw downhill direction
-            Vector3 downhill = Vector3.ProjectOnPlane(Vector3.down, hit.normal).normalized;
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawLine(hit.point, hit.point + downhill * 0.5f);
-        }
+        // draw a small forward direction marker
+        Gizmos.color = Color.white;
+        Gizmos.DrawLine(transform.position, transform.position + transform.forward * 0.5f);
     }
 }
