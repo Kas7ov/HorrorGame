@@ -1,0 +1,15 @@
+{
+  "head_parent": "neck",
+  "head_min_z": 3.3030803203582764,
+  "pelvis_top_z": 2.2,
+  "forward": "-Y",
+  "up": "+Z",
+  "rig_bones": 58,
+  "rig_weighted": false,
+  "anatomy_vertices": 206560,
+  "mesh_objects": 186,
+  "total_vertices": 2963732,
+  "exposed_ribs": 12,
+  "sternal_plates": 7,
+  "no_eyes": true
+}

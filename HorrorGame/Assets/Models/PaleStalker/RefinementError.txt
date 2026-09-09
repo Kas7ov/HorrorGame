@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "E:\EpsteinHorror\HorrorGame\Tools\refine_pale_stalker.py", line 150, in <module>
+    try:main()
+        ~~~~^^
+  File "E:\EpsteinHorror\HorrorGame\Tools\refine_pale_stalker.py", line 43, in main
+    body.vertex_groups.remove(vg);body.data.update();bpy.context.view_layer.update()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^
+RuntimeError: Error: DeformGroup 'Localized connective tissue relaxation' not in object 'BODY | continuous lean dermis'
+
