@@ -1,0 +1,1 @@
+Jarvis_Manor.unity is saved. Static structural checks passed. Automated HDRP previews failed during a D3D12 graphics-driver crash; automatic rendering is disabled. Interactive gameplay and final lighting are not yet verified.
