@@ -1,0 +1,57 @@
+#ifndef DRAGON_EYE_HORIZON_INCLUDED
+#define DRAGON_EYE_HORIZON_INCLUDED
+
+// Supplied per camera by DragonEyeSkyPass, not by a replacement sky.
+TEXTURE2D(_DragonEyeTexture);
+SAMPLER(sampler_DragonEyeTexture);
+float4 _DragonEyeForward, _DragonEyeRight, _DragonEyeUp;
+float4 _DragonEyeShape; // tangent half-width, tangent half-height, opening, opacity
+float4 _DragonEyeLook;  // edge softness, radiance, time, atmospheric fade
+float4 _DragonEyeTint;
+
+void DragonEyeHorizon_float(float4 ScreenUV, out float3 Color, out float Alpha)
+{
+    Color = 0; Alpha = 0;
+    #ifndef SHADERGRAPH_PREVIEW
+        uint2 pixel = uint2(ScreenUV.xy * _ScreenSize.xy);
+        float depth = LoadCameraDepth(pixel);
+        // Only empty sky pixels. Trees, terrain and buildings occlude the eye.
+        #if UNITY_REVERSED_Z
+            if (depth > 0.000001) return;
+        #else
+            if (depth < 0.999999) return;
+        #endif
+        float3 farPosition = ComputeWorldSpacePosition(ScreenUV.xy,
+            UNITY_RAW_FAR_CLIP_VALUE == 0 ? 0.0001 : 0.9999, UNITY_MATRIX_I_VP);
+        float3 ray = -GetWorldSpaceNormalizeViewDir(farPosition);
+        float facing = dot(ray, _DragonEyeForward.xyz);
+        if (facing <= 0.05) return;
+        float2 p = float2(dot(ray, _DragonEyeRight.xyz), dot(ray, _DragonEyeUp.xyz))
+            / (facing * _DragonEyeShape.xy);
+        float2 uv = p * 0.5 + 0.5;
+        if (any(uv < 0) || any(uv > 1)) return;
+        float opening = saturate(_DragonEyeShape.z);
+        if (opening <= 0.0001) return;
+        float almond = pow(saturate(1 - p.x * p.x), 0.65);
+        float lidHeight = opening * almond;
+        float lid = 1 - smoothstep(lidHeight - 0.035, lidHeight + 0.035, abs(p.y));
+        float edge = 1 - smoothstep(1 - _DragonEyeLook.x, 1, length(p));
+        // Crop the photo's beige frame, then softly feather the silhouette.
+        float2 artworkUV = lerp(float2(0.045, 0.04), float2(0.955, 0.96), uv);
+        float3 eye = SAMPLE_TEXTURE2D_LOD(_DragonEyeTexture, sampler_DragonEyeTexture, artworkUV, 0).rgb;
+        float breath = 1 + 0.035 * sin(_DragonEyeLook.z * 1.7);
+        Color = eye * _DragonEyeTint.rgb * _DragonEyeLook.y * breath
+            * GetCurrentExposureMultiplier();
+        Alpha = saturate(lid * edge * _DragonEyeShape.w * smoothstep(0, 0.1, opening));
+        // Real HDRP fog and volumetric clouds also render on top of this pass.
+        Alpha *= smoothstep(-0.015, _DragonEyeLook.w, ray.y);
+    #endif
+}
+
+void DragonEyeHorizon_half(half4 ScreenUV, out half3 Color, out half Alpha)
+{
+    float3 c; float a;
+    DragonEyeHorizon_float(ScreenUV, c, a);
+    Color = c; Alpha = a;
+}
+#endif

@@ -7,7 +7,6 @@ using UnityEngine.Rendering.HighDefinition;
 public static class TreeBarkSetup
 {
     const string Folder = "Assets/Tree_HDRP/BarkTextures/";
-    [MenuItem("Tools/Trees/Apply Realistic Bark")]
     static void Setup()
     {
         Texture2D diffuse = Import("diff", false);

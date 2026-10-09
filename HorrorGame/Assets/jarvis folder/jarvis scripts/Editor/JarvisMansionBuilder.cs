@@ -33,7 +33,6 @@ namespace JarvisMansion.Editor
             { EditorApplication.delayCall += TryBuild; return; }
             Build();
         }
-        [MenuItem("Tools/Jarvis/Create mansion if missing")]
         public static void Build()
         {
             if (busy || File.Exists(ScenePath)) return;

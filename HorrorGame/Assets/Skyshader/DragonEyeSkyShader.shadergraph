@@ -1,0 +1,684 @@
+{
+    "m_SGVersion": 3,
+    "m_Type": "UnityEditor.ShaderGraph.GraphData",
+    "m_ObjectId": "96110b76ffe84d2cb7eb17ba99ad2fd7",
+    "m_Properties": [
+        {
+            "m_Id": "de771ab00dd94e90a123000000000000"
+        },
+        {
+            "m_Id": "de771ab00dd94e90a123000000000001"
+        },
+        {
+            "m_Id": "de771ab00dd94e90a123000000000002"
+        },
+        {
+            "m_Id": "de771ab00dd94e90a123000000000003"
+        },
+        {
+            "m_Id": "de771ab00dd94e90a123000000000004"
+        },
+        {
+            "m_Id": "de771ab00dd94e90a123000000000005"
+        },
+        {
+            "m_Id": "de771ab00dd94e90a123000000000006"
+        }
+    ],
+    "m_Keywords": [],
+    "m_Dropdowns": [],
+    "m_CategoryData": [
+        {
+            "m_Id": "38dcc741398442d6b94afcb5fdb66766"
+        }
+    ],
+    "m_Nodes": [
+        {
+            "m_Id": "bc3f1b16fd264a509456bf48e04b9aa6"
+        },
+        {
+            "m_Id": "676b49446f2f46efaebf16af8cee3a3e"
+        },
+        {
+            "m_Id": "89fdc4a3afd4434e8c91055d956ac9b1"
+        }
+    ],
+    "m_GroupDatas": [],
+    "m_StickyNoteDatas": [],
+    "m_Edges": [
+        {
+            "m_OutputSlot": {
+                "m_Node": {
+                    "m_Id": "89fdc4a3afd4434e8c91055d956ac9b1"
+                },
+                "m_SlotId": 1
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "bc3f1b16fd264a509456bf48e04b9aa6"
+                },
+                "m_SlotId": 0
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
+                    "m_Id": "89fdc4a3afd4434e8c91055d956ac9b1"
+                },
+                "m_SlotId": 2
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "676b49446f2f46efaebf16af8cee3a3e"
+                },
+                "m_SlotId": 0
+            }
+        }
+    ],
+    "m_VertexContext": {
+        "m_Position": {
+            "x": 0,
+            "y": 0
+        },
+        "m_Blocks": []
+    },
+    "m_FragmentContext": {
+        "m_Position": {
+            "x": 0,
+            "y": 200
+        },
+        "m_Blocks": [
+            {
+                "m_Id": "bc3f1b16fd264a509456bf48e04b9aa6"
+            },
+            {
+                "m_Id": "676b49446f2f46efaebf16af8cee3a3e"
+            }
+        ]
+    },
+    "m_PreviewData": {
+        "serializedMesh": {
+            "m_SerializedMesh": "{\"mesh\":{\"instanceID\":0}}",
+            "m_Guid": ""
+        },
+        "preventRotation": false
+    },
+    "m_Path": "HorrorGame/Skyshader",
+    "m_GraphPrecision": 1,
+    "m_PreviewMode": 2,
+    "m_OutputNode": {
+        "m_Id": ""
+    },
+    "m_SubDatas": [],
+    "m_ActiveTargets": [
+        {
+            "m_Id": "85cbe4f16c8f42a29ee6045b172247ae"
+        }
+    ]
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.CategoryData",
+    "m_ObjectId": "38dcc741398442d6b94afcb5fdb66766",
+    "m_Name": "",
+    "m_ChildObjectList": [
+        {
+            "m_Id": "de771ab00dd94e90a123000000000000"
+        },
+        {
+            "m_Id": "de771ab00dd94e90a123000000000001"
+        },
+        {
+            "m_Id": "de771ab00dd94e90a123000000000002"
+        },
+        {
+            "m_Id": "de771ab00dd94e90a123000000000003"
+        },
+        {
+            "m_Id": "de771ab00dd94e90a123000000000004"
+        },
+        {
+            "m_Id": "de771ab00dd94e90a123000000000005"
+        },
+        {
+            "m_Id": "de771ab00dd94e90a123000000000006"
+        }
+    ]
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.ColorRGBMaterialSlot",
+    "m_ObjectId": "407d4602997049f0a44b727ba5e999dc",
+    "m_Id": 0,
+    "m_DisplayName": "Base Color",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_HideConnector": false,
+    "m_ShaderOutputName": "BaseColor",
+    "m_StageCapability": 2,
+    "m_CustomBinding": "",
+    "m_Value": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+    },
+    "m_DefaultValue": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+    },
+    "m_Labels": [],
+    "m_ColorMode": 0,
+    "m_DefaultColor": {
+        "r": 0.5,
+        "g": 0.5,
+        "b": 0.5,
+        "a": 1
+    }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
+    "m_ObjectId": "499322b7a1524b59903589297fd0c085",
+    "m_Id": 0,
+    "m_DisplayName": "Alpha",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_HideConnector": false,
+    "m_ShaderOutputName": "Alpha",
+    "m_StageCapability": 2,
+    "m_CustomBinding": "",
+    "m_Value": 1,
+    "m_DefaultValue": 1,
+    "m_Labels": [],
+    "m_LiteralMode": false
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
+    "m_ObjectId": "4a43ef20f7d34fc9b742ca2b3ef84c0c",
+    "m_Id": 2,
+    "m_DisplayName": "Alpha",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_HideConnector": false,
+    "m_ShaderOutputName": "Alpha",
+    "m_StageCapability": 3,
+    "m_CustomBinding": "",
+    "m_Value": 0,
+    "m_DefaultValue": 0,
+    "m_Labels": [],
+    "m_LiteralMode": false
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.BlockNode",
+    "m_ObjectId": "676b49446f2f46efaebf16af8cee3a3e",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "SurfaceDescription.Alpha",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "499322b7a1524b59903589297fd0c085"
+        }
+    ],
+    "synonyms": [],
+    "m_Precision": 0,
+    "m_PreviewExpanded": true,
+    "m_DismissedVersion": 0,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_SerializedDescriptor": "SurfaceDescription.Alpha"
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.Rendering.HighDefinition.ShaderGraph.HDFullscreenSubTarget",
+    "m_ObjectId": "68b4ee763a504778b9b51585673070eb"
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.Rendering.Fullscreen.ShaderGraph.FullscreenData",
+    "m_ObjectId": "6c5785c067cb41f38b7a2dd7e52fb488",
+    "m_Version": 0,
+    "m_fullscreenMode": 0,
+    "m_BlendMode": 1,
+    "m_SrcColorBlendMode": 0,
+    "m_DstColorBlendMode": 1,
+    "m_ColorBlendOperation": 0,
+    "m_SrcAlphaBlendMode": 0,
+    "m_DstAlphaBlendMode": 1,
+    "m_AlphaBlendOperation": 0,
+    "m_EnableStencil": false,
+    "m_StencilReference": 0,
+    "m_StencilReadMask": 255,
+    "m_StencilWriteMask": 255,
+    "m_StencilCompareFunction": 8,
+    "m_StencilPassOperation": 0,
+    "m_StencilFailOperation": 0,
+    "m_StencilDepthFailOperation": 0,
+    "m_DepthWrite": false,
+    "m_depthWriteMode": 0,
+    "m_AllowMaterialOverride": false,
+    "m_DepthTestMode": 0
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.Rendering.HighDefinition.ShaderGraph.HDTarget",
+    "m_ObjectId": "85cbe4f16c8f42a29ee6045b172247ae",
+    "m_ActiveSubTarget": {
+        "m_Id": "68b4ee763a504778b9b51585673070eb"
+    },
+    "m_Datas": [
+        {
+            "m_Id": "6c5785c067cb41f38b7a2dd7e52fb488"
+        },
+        {
+            "m_Id": "9fdf6528559a4d10904a9d7762bc5321"
+        }
+    ],
+    "m_CustomEditorGUI": "",
+    "m_SupportVFX": false,
+    "m_SupportLineRendering": false
+}
+
+{
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.CustomFunctionNode",
+    "m_ObjectId": "89fdc4a3afd4434e8c91055d956ac9b1",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "DragonEyeHorizon (Custom Function)",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": -297,
+            "y": 200,
+            "width": 160,
+            "height": 136
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "d377937c6e6d4a0fa47407cfb4969f22"
+        },
+        {
+            "m_Id": "b4f911e9370149ffaa8b6d39fa2653e5"
+        },
+        {
+            "m_Id": "4a43ef20f7d34fc9b742ca2b3ef84c0c"
+        }
+    ],
+    "synonyms": [
+        "screen buffer"
+    ],
+    "m_Precision": 1,
+    "m_PreviewExpanded": true,
+    "m_DismissedVersion": 0,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_SourceType": 1,
+    "m_FunctionName": "DragonEyeHorizon",
+    "m_FunctionSource": "",
+    "m_FunctionSourceUsePragmas": false,
+    "m_FunctionBody": "Color = 0; Alpha = 0;\n    #ifndef SHADERGRAPH_PREVIEW\n        uint2 pixel = uint2(ScreenUV.xy * _ScreenSize.xy);\n        float depth = LoadCameraDepth(pixel);\n        // Only empty sky pixels. Trees, terrain and buildings occlude the eye.\n        #if UNITY_REVERSED_Z\n            if (depth > 0.000001) return;\n        #else\n            if (depth < 0.999999) return;\n        #endif\n        float3 farPosition = ComputeWorldSpacePosition(ScreenUV.xy,\n            UNITY_RAW_FAR_CLIP_VALUE == 0 ? 0.0001 : 0.9999, UNITY_MATRIX_I_VP);\n        float3 ray = -GetWorldSpaceNormalizeViewDir(farPosition);\n        float facing = dot(ray, _DragonEyeForward.xyz);\n        if (facing <= 0.05) return;\n        float2 p = float2(dot(ray, _DragonEyeRight.xyz), dot(ray, _DragonEyeUp.xyz))\n            / (facing * _DragonEyeShape.xy);\n        float2 uv = p * 0.5 + 0.5;\n        if (any(uv < 0) || any(uv > 1)) return;\n        float opening = saturate(_DragonEyeShape.z);\n        if (opening <= 0.0001) return;\n        float almond = pow(saturate(1 - p.x * p.x), 0.65);\n        float lidHeight = opening * almond;\n        float lid = 1 - smoothstep(lidHeight - 0.035, lidHeight + 0.035, abs(p.y));\n        float edge = 1 - smoothstep(1 - _DragonEyeLook.x, 1, length(p));\n        // Crop the photo's beige frame, then softly feather the silhouette.\n        float2 artworkUV = lerp(float2(0.045, 0.04), float2(0.955, 0.96), uv);\n        float3 eye = SAMPLE_TEXTURE2D_LOD(_DragonEyeTexture, sampler_DragonEyeTexture, artworkUV, 0).rgb;\n        float breath = 1 + 0.035 * sin(_DragonEyeLook.z * 1.7);\n        Color = eye * _DragonEyeTint.rgb * _DragonEyeLook.y * breath\n            * GetCurrentExposureMultiplier();\n        Alpha = saturate(lid * edge * _DragonEyeShape.w * smoothstep(0, 0.1, opening));\n        // Real HDRP fog and volumetric clouds also render on top of this pass.\n        Alpha *= smoothstep(-0.015, _DragonEyeLook.w, ray.y);\n    #endif"
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.Rendering.HighDefinition.ShaderGraph.HDFullscreenData",
+    "m_ObjectId": "9fdf6528559a4d10904a9d7762bc5321",
+    "m_ShowOnlyHDStencilBits": true
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.ColorRGBMaterialSlot",
+    "m_ObjectId": "b4f911e9370149ffaa8b6d39fa2653e5",
+    "m_Id": 1,
+    "m_DisplayName": "Color",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_HideConnector": false,
+    "m_ShaderOutputName": "Color",
+    "m_StageCapability": 3,
+    "m_CustomBinding": "",
+    "m_Value": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+    },
+    "m_DefaultValue": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+    },
+    "m_Labels": [],
+    "m_ColorMode": 1,
+    "m_DefaultColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 1
+    }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.BlockNode",
+    "m_ObjectId": "bc3f1b16fd264a509456bf48e04b9aa6",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "SurfaceDescription.BaseColor",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "407d4602997049f0a44b727ba5e999dc"
+        }
+    ],
+    "synonyms": [],
+    "m_Precision": 0,
+    "m_PreviewExpanded": true,
+    "m_DismissedVersion": 0,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_SerializedDescriptor": "SurfaceDescription.BaseColor"
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.ScreenPositionMaterialSlot",
+    "m_ObjectId": "d377937c6e6d4a0fa47407cfb4969f22",
+    "m_Id": 0,
+    "m_DisplayName": "UV",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_HideConnector": false,
+    "m_ShaderOutputName": "ScreenUV",
+    "m_StageCapability": 3,
+    "m_CustomBinding": "",
+    "m_Value": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 0
+    },
+    "m_DefaultValue": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 0
+    },
+    "m_Labels": [],
+    "m_ScreenSpaceType": 0
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Texture2DShaderProperty",
+    "m_ObjectId": "de771ab00dd94e90a123000000000000",
+    "m_Guid": {
+        "m_GuidSerialized": "de771ab0-0dd9-4e90-a123-000000000000"
+    },
+    "promotedFromAssetID": "",
+    "promotedFromCategoryName": "",
+    "promotedOrdering": -1,
+    "m_Name": "Eye Texture",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "Eye Texture",
+    "m_DefaultReferenceName": "_DragonEyeTexture",
+    "m_OverrideReferenceName": "_DragonEyeTexture",
+    "m_GeneratePropertyBlock": false,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 1,
+    "overrideHLSLDeclaration": true,
+    "hlslDeclarationOverride": 1,
+    "m_Hidden": true,
+    "m_PerRendererData": false,
+    "m_customAttributes": [],
+    "m_Value": {
+        "m_SerializedTexture": "",
+        "m_Guid": ""
+    },
+    "isMainTexture": false,
+    "useTilingAndOffset": false,
+    "useTexelSize": false,
+    "m_Modifiable": true,
+    "m_DefaultType": 1
+}
+
+{
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector4ShaderProperty",
+    "m_ObjectId": "de771ab00dd94e90a123000000000001",
+    "m_Guid": {
+        "m_GuidSerialized": "de771ab0-0dd9-4e90-a123-000000000001"
+    },
+    "promotedFromAssetID": "",
+    "promotedFromCategoryName": "",
+    "promotedOrdering": -1,
+    "m_Name": "Eye Forward",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "Eye Forward",
+    "m_DefaultReferenceName": "_DragonEyeForward",
+    "m_OverrideReferenceName": "_DragonEyeForward",
+    "m_GeneratePropertyBlock": false,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 1,
+    "overrideHLSLDeclaration": true,
+    "hlslDeclarationOverride": 1,
+    "m_Hidden": true,
+    "m_PerRendererData": false,
+    "m_customAttributes": [],
+    "m_Value": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 0
+    }
+}
+
+{
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector4ShaderProperty",
+    "m_ObjectId": "de771ab00dd94e90a123000000000002",
+    "m_Guid": {
+        "m_GuidSerialized": "de771ab0-0dd9-4e90-a123-000000000002"
+    },
+    "promotedFromAssetID": "",
+    "promotedFromCategoryName": "",
+    "promotedOrdering": -1,
+    "m_Name": "Eye Right",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "Eye Right",
+    "m_DefaultReferenceName": "_DragonEyeRight",
+    "m_OverrideReferenceName": "_DragonEyeRight",
+    "m_GeneratePropertyBlock": false,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 1,
+    "overrideHLSLDeclaration": true,
+    "hlslDeclarationOverride": 1,
+    "m_Hidden": true,
+    "m_PerRendererData": false,
+    "m_customAttributes": [],
+    "m_Value": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 0
+    }
+}
+
+{
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector4ShaderProperty",
+    "m_ObjectId": "de771ab00dd94e90a123000000000003",
+    "m_Guid": {
+        "m_GuidSerialized": "de771ab0-0dd9-4e90-a123-000000000003"
+    },
+    "promotedFromAssetID": "",
+    "promotedFromCategoryName": "",
+    "promotedOrdering": -1,
+    "m_Name": "Eye Up",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "Eye Up",
+    "m_DefaultReferenceName": "_DragonEyeUp",
+    "m_OverrideReferenceName": "_DragonEyeUp",
+    "m_GeneratePropertyBlock": false,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 1,
+    "overrideHLSLDeclaration": true,
+    "hlslDeclarationOverride": 1,
+    "m_Hidden": true,
+    "m_PerRendererData": false,
+    "m_customAttributes": [],
+    "m_Value": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 0
+    }
+}
+
+{
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector4ShaderProperty",
+    "m_ObjectId": "de771ab00dd94e90a123000000000004",
+    "m_Guid": {
+        "m_GuidSerialized": "de771ab0-0dd9-4e90-a123-000000000004"
+    },
+    "promotedFromAssetID": "",
+    "promotedFromCategoryName": "",
+    "promotedOrdering": -1,
+    "m_Name": "Eye Shape",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "Eye Shape",
+    "m_DefaultReferenceName": "_DragonEyeShape",
+    "m_OverrideReferenceName": "_DragonEyeShape",
+    "m_GeneratePropertyBlock": false,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 1,
+    "overrideHLSLDeclaration": true,
+    "hlslDeclarationOverride": 1,
+    "m_Hidden": true,
+    "m_PerRendererData": false,
+    "m_customAttributes": [],
+    "m_Value": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 0
+    }
+}
+
+{
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector4ShaderProperty",
+    "m_ObjectId": "de771ab00dd94e90a123000000000005",
+    "m_Guid": {
+        "m_GuidSerialized": "de771ab0-0dd9-4e90-a123-000000000005"
+    },
+    "promotedFromAssetID": "",
+    "promotedFromCategoryName": "",
+    "promotedOrdering": -1,
+    "m_Name": "Eye Look",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "Eye Look",
+    "m_DefaultReferenceName": "_DragonEyeLook",
+    "m_OverrideReferenceName": "_DragonEyeLook",
+    "m_GeneratePropertyBlock": false,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 1,
+    "overrideHLSLDeclaration": true,
+    "hlslDeclarationOverride": 1,
+    "m_Hidden": true,
+    "m_PerRendererData": false,
+    "m_customAttributes": [],
+    "m_Value": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 0
+    }
+}
+
+{
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector4ShaderProperty",
+    "m_ObjectId": "de771ab00dd94e90a123000000000006",
+    "m_Guid": {
+        "m_GuidSerialized": "de771ab0-0dd9-4e90-a123-000000000006"
+    },
+    "promotedFromAssetID": "",
+    "promotedFromCategoryName": "",
+    "promotedOrdering": -1,
+    "m_Name": "Eye Tint",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "Eye Tint",
+    "m_DefaultReferenceName": "_DragonEyeTint",
+    "m_OverrideReferenceName": "_DragonEyeTint",
+    "m_GeneratePropertyBlock": false,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 1,
+    "overrideHLSLDeclaration": true,
+    "hlslDeclarationOverride": 1,
+    "m_Hidden": true,
+    "m_PerRendererData": false,
+    "m_customAttributes": [],
+    "m_Value": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 0
+    }
+}

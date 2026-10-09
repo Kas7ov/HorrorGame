@@ -1,0 +1,1 @@
+PASS: HDRP GPU leaf-wind shader assigned; alpha clipping and double sided leaves retained; terrain prototypes refreshed. No per-tree scripts required.

@@ -19,6 +19,23 @@ public sealed class TreeLeafSway : MonoBehaviour
     {
         filter = GetComponent<MeshFilter>();
         if (!sourceMesh) sourceMesh = filter.sharedMesh;
+        var renderer = GetComponent<MeshRenderer>();
+        if (renderer)
+        {
+            foreach (var material in renderer.sharedMaterials)
+                if (material && material.shader && material.shader.name == "HorrorGame/HDRP/Leaves Wind Lit")
+                {
+                    if (sourceMesh) filter.sharedMesh = sourceMesh;
+                    return; // GPU wind also handles individually placed trees; avoid double movement.
+                }
+        }
+        // Keep permanent mesh references while editing and in prefab import/terrain scans.
+        // Terrain-painted instances are rendered directly and do not execute this script.
+        if (!Application.IsPlaying(gameObject))
+        {
+            if (sourceMesh) filter.sharedMesh = sourceMesh;
+            return;
+        }
         if (!sourceMesh || sourceMesh.subMeshCount < 2 || !sourceMesh.isReadable) return;
         animatedMesh = Instantiate(sourceMesh);
         animatedMesh.name = sourceMesh.name + " (live leaves)";
@@ -47,6 +64,8 @@ public sealed class TreeLeafSway : MonoBehaviour
         bounds.Expand(2f);
         animatedMesh.bounds = bounds;
         filter.sharedMesh = animatedMesh;
+        var lod = GetComponent<LODGroup>();
+        if (lod) lod.RecalculateBounds();
         nextUpdate = 0;
     }
 

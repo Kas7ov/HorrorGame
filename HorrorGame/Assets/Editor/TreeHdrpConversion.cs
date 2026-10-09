@@ -9,7 +9,6 @@ public static class TreeHdrpConversion
 {
     const string Folder = "Assets/Tree_HDRP";
 
-    [MenuItem("Tools/Trees/Convert Selected Tree to HDRP")]
     public static void ConvertSelected()
     {
         GameObject source = Selection.activeGameObject;

@@ -7,7 +7,6 @@ using UnityEngine;
 public static class TreeGroundSetup
 {
     const string Folder = "Assets/GroundTextures";
-    [MenuItem("Tools/Trees/Add Leaf Sway and Soil Ground")]
     static void Setup()
     {
         string prefabPath = "Assets/Tree_HDRP/Tree_HDRP.prefab";

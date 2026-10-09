@@ -14,7 +14,6 @@ public static class PlayerMovementSlopeChecks
     static StringBuilder trace;
     static PlayerMovement scenePlayer;
 
-    [MenuItem("Tools/Player/Verify Slope Movement")]
     public static void Verify()
     {
         if (EditorApplication.isPlaying) throw new InvalidOperationException("Run slope checks outside Play mode.");
