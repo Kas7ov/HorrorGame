@@ -39,7 +39,7 @@ public class PlayerMovement : MonoBehaviour
 
     [Tooltip("Initial forward slide speed multiplier (applied to current moveSpeed).")]
     public float slideSpeedMultiplier = 1.8f;
-    [Tooltip("Maximum time a slide can last in seconds (strong push phase).")]
+    [Tooltip("Slide duration on flat ground. Downhill slides continue until the slope levels out.")]
     public float slideDuration = 0.9f;
     [Tooltip("Minimum horizontal speed required to start a slide.")]
     public float slideStartSpeed = 3.5f;
@@ -60,6 +60,16 @@ public class PlayerMovement : MonoBehaviour
     public float slopeSlideThresholdAngle = 5f;
     [Tooltip("Downhill acceleration applied to slide velocity while on slope.")]
     public float slopeSlideAcceleration = 9f;
+    [Tooltip("Fraction of normal friction while sliding downhill.")]
+    [Range(0f, 1f)] public float downhillFrictionMultiplier = 0.12f;
+    [Tooltip("Extra friction when the slide is travelling uphill.")]
+    public float uphillFrictionMultiplier = 2.5f;
+    [Tooltip("Fraction of the initial slide impulse and duration when starting uphill.")]
+    [Range(0.1f, 1f)] public float uphillSlideMultiplier = 0.35f;
+    [Tooltip("Maximum slide speed as a multiple of sprint speed.")]
+    public float maxSlideSpeedMultiplier = 2.5f;
+    [Tooltip("Brief ground-contact grace period for terrain seams. Jumping still cancels the slide immediately.")]
+    public float slideGroundGraceTime = 0.12f;
     [Tooltip("Extra ground raycast distance for slope detection.")]
     public float groundRaycastExtra = 0.5f;
 
@@ -85,6 +95,8 @@ public class PlayerMovement : MonoBehaviour
 
     // physics-ish slide velocity (can contain vertical component when projected on slope)
     private Vector3 slideVelocity = Vector3.zero;
+    private float slideGroundGraceTimer;
+    private readonly RaycastHit[] groundHits = new RaycastHit[32];
 
     // to restore standing height
     private float standingHeight;
@@ -164,7 +176,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Running state
-        bool runInput = Input.GetKey(sprintKey) && inputMagnitude > 0.01f && !isCrouching && !isSliding;
+        bool runInput = Input.GetKey(sprintKey) && inputMagnitude > 0.01f && (!isCrouching || Input.GetKeyDown(crouchKey)) && !isSliding;
         float currentBaseSpeed = moveSpeed * (runInput ? sprintMultiplier : 1f);
 
         // FOV change
@@ -179,15 +191,14 @@ public class PlayerMovement : MonoBehaviour
         bool crouchPressedDown = Input.GetKeyDown(crouchKey);
 
         // Use centralized handler (slope-aware; slide can start on slope if raycast detects sufficient steepness)
-        Vector3 horizontalMove = HandleCrouchAndSlide(moveDirection, inputMagnitude, crouchHeld, crouchPressedDown, currentBaseSpeed, runInput);
-
-        // Apply horizontal and vertical movement
-        controller.Move(horizontalMove * Time.deltaTime);
+        Vector3 horizontalMove = HandleCrouchAndSlide(moveDirection, inputMagnitude, crouchHeld, crouchPressedDown, currentBaseSpeed, runInput, Time.deltaTime);
 
         // Jump (cancels slide)
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
             playerVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            horizontalMove.y = 0f;
+            slideVelocity = Vector3.zero;
             if (isSliding)
             {
                 isSliding = false;
@@ -200,7 +211,10 @@ public class PlayerMovement : MonoBehaviour
 
         // Gravity
         playerVelocity.y += gravity * Time.deltaTime;
-        controller.Move(playerVelocity * Time.deltaTime);
+        // One Move keeps ground contact coherent while following a downward slope.
+        CollisionFlags collisions = controller.Move((horizontalMove + playerVelocity) * Time.deltaTime);
+        if ((collisions & CollisionFlags.Above) != 0 && playerVelocity.y > 0f)
+            playerVelocity.y = 0f;
     }
 
     /// <summary>
@@ -211,7 +225,7 @@ public class PlayerMovement : MonoBehaviour
     {
         // controller.center is local; transform.TransformPoint gives world
         Vector3 worldCenter = transform.TransformPoint(controller.center);
-        float halfHeight = Mathf.Max(0f, controller.height * 0.5f - controller.radius);
+        float halfHeight = controller.height * 0.5f * Mathf.Abs(transform.lossyScale.y);
         return worldCenter - Vector3.up * halfHeight;
     }
 
@@ -225,15 +239,23 @@ public class PlayerMovement : MonoBehaviour
         hitInfo = default;
         normal = Vector3.up;
 
-        float radius = Mathf.Max(0.01f, controller.radius * 0.9f);
-        float maxDist = controller.height * 0.5f + groundRaycastExtra;
-        if (Physics.SphereCast(sampleOrigin + Vector3.up * forwardSampleUp, radius, Vector3.down, out hitInfo, maxDist, ~0, QueryTriggerInteraction.Ignore))
+        float radius = Mathf.Max(0.01f, controller.radius * 0.75f * Mathf.Max(Mathf.Abs(transform.lossyScale.x), Mathf.Abs(transform.lossyScale.z)));
+        float lift = Mathf.Max(0.05f, forwardSampleUp);
+        float maxDist = lift + Mathf.Clamp(groundRaycastExtra, 0.05f, 1f);
+        int count = Physics.SphereCastNonAlloc(sampleOrigin + Vector3.up * (radius + lift), radius, Vector3.down, groundHits, maxDist, ~0, QueryTriggerInteraction.Ignore);
+        float nearest = float.PositiveInfinity;
+        for (int i = 0; i < count; i++)
         {
-            normal = hitInfo.normal;
-            return true;
+            RaycastHit hit = groundHits[i];
+            // The player also has a CapsuleCollider in some scenes. Never sample ourselves.
+            if (hit.collider == null || hit.collider.transform.IsChildOf(transform) || hit.normal.y <= 0.05f || hit.distance >= nearest)
+                continue;
+            nearest = hit.distance;
+            hitInfo = hit;
         }
-
-        return false;
+        if (float.IsPositiveInfinity(nearest)) return false;
+        normal = hitInfo.normal;
+        return true;
     }
 
     /// <summary>
@@ -260,18 +282,18 @@ public class PlayerMovement : MonoBehaviour
         RaycastHit fHit;
         bool forward = SampleGroundAt(forwardOrigin, out fNormal, out fHit);
 
-        // choose forward sample if it exists and is steeper or if player is moving forward
-        if (forward)
-        {
-            groundNormal = fNormal;
-            forwardHit = fHit;
-            return true;
-        }
-
+        // Use the surface supporting the capsule, not a different slope ahead of it.
         if (center)
         {
             groundNormal = centerNormal;
             forwardHit = centerHit;
+            return true;
+        }
+
+        if (forward)
+        {
+            groundNormal = fNormal;
+            forwardHit = fHit;
             return true;
         }
 
@@ -280,19 +302,17 @@ public class PlayerMovement : MonoBehaviour
 
     /// <summary>
     /// Handles crouch + slide logic.
-    /// - Slide starts when sprint+crouch pressed while moving OR when sprint+crouch pressed while a forward raycast detects a slope >= threshold.
-    /// - If sliding and the raycast detects a downhill slope, slope will accelerate the slide (so slide continues down slopes).
-    /// - If sliding wasn't started, slopes only modify walking speed (downhill faster, uphill slower).
-    /// This version samples forward ground to work with capsule colliders.
+    /// Sprint+crouch starts a slide. Gravity sustains downhill slides; uphill slides brake
+    /// quickly, and flat-ground slides expire. Walking speed depends on slope and direction.
     /// </summary>
-    private Vector3 HandleCrouchAndSlide(Vector3 moveDirection, float inputMagnitude, bool crouchHeld, bool crouchPressedDown, float baseMoveSpeed, bool isRunning)
+    private Vector3 HandleCrouchAndSlide(Vector3 moveDirection, float inputMagnitude, bool crouchHeld, bool crouchPressedDown, float baseMoveSpeed, bool isRunning, float deltaTime)
     {
         // Manage crouch state (hold to crouch) - do not override if sliding
         if (crouchHeld && !isSliding)
         {
             isCrouching = true;
             targetHeight = crouchHeight;
-            targetCenter = new Vector3(standingCenter.x, crouchHeight / 2f, standingCenter.z);
+            targetCenter = GetCrouchCenter();
         }
         else if (!isSliding)
         {
@@ -304,28 +324,33 @@ public class PlayerMovement : MonoBehaviour
         // Smoothly adjust controller height/center
         if (Mathf.Abs(controller.height - targetHeight) > 0.001f)
         {
-            controller.height = Mathf.MoveTowards(controller.height, targetHeight, heightAdjustSpeed * Time.deltaTime);
-            controller.center = Vector3.MoveTowards(controller.center, targetCenter, heightAdjustSpeed * Time.deltaTime);
+            controller.height = Mathf.MoveTowards(controller.height, targetHeight, heightAdjustSpeed * deltaTime);
+            controller.center = standingCenter + Vector3.down * ((standingHeight - controller.height) * 0.5f);
         }
 
         // Sample forward ground (capsule-friendly)
         Vector3 groundNormal = Vector3.up;
         RaycastHit forwardHit;
-        bool groundFound = isGrounded && SampleGroundForward(moveDirection, forwardSlopeCheckDistance, out groundNormal, out forwardHit);
+        bool groundFound = SampleGroundForward(moveDirection, forwardSlopeCheckDistance, out groundNormal, out forwardHit);
+        // Recover contact over shallow downhill gaps, but never glue a jump to the ground.
+        if (groundFound && !isGrounded)
+            groundFound = playerVelocity.y <= 0f && forwardHit.distance <= Mathf.Max(0.05f, forwardSampleUp) + Mathf.Max(0.15f, controller.skinWidth * 2f);
+        if (!groundFound) groundNormal = Vector3.up;
+        else if (playerVelocity.y <= 0f) isGrounded = true;
         float slopeAngle = Vector3.Angle(groundNormal, Vector3.up);
         Vector3 downhill = Vector3.zero;
         if (groundFound && slopeAngle > slopeSlideThresholdAngle)
             downhill = Vector3.ProjectOnPlane(Vector3.down, groundNormal).normalized;
 
         // Compute current horizontal speed estimate (used for slide-start tests)
-        float currentHorizontalSpeed = baseMoveSpeed * inputMagnitude * (isCrouching ? crouchSpeedMultiplier : 1f);
         bool hasMovementInput = inputMagnitude > 0.01f;
         bool slopeAllowsStart = groundFound && slopeAngle >= slopeSlideThresholdAngle;
 
         // Slide start condition:
         // - sprint + crouch pressed while moving (existing behavior), OR
         // - sprint + crouch pressed while standing on a sufficiently steep downhill slope (forward sample detects slope)
-        if (crouchPressedDown && !isSliding && isRunning && slideCooldownTimer <= 0f && (hasMovementInput || slopeAllowsStart) && isGrounded)
+        float startSpeed = baseMoveSpeed * Mathf.Clamp01(inputMagnitude);
+        if (crouchPressedDown && !isSliding && isRunning && slideCooldownTimer <= 0f && (startSpeed >= slideStartSpeed || slopeAllowsStart) && isGrounded)
         {
             isSliding = true;
             slideTimer = slideDuration;
@@ -341,11 +366,17 @@ public class PlayerMovement : MonoBehaviour
 
             // Project initial velocity onto slope plane so movement follows the surface (keeps vertical component)
             slideVelocity = Vector3.ProjectOnPlane(slideVelocity, groundNormal);
+            if (downhill.sqrMagnitude > 0.001f && Vector3.Dot(slideVelocity, downhill) < 0f)
+            {
+                slideVelocity *= uphillSlideMultiplier;
+                slideTimer *= uphillSlideMultiplier;
+            }
+            slideGroundGraceTimer = slideGroundGraceTime;
 
             // enforce crouch visually
             isCrouching = true;
             targetHeight = crouchHeight;
-            targetCenter = new Vector3(standingCenter.x, crouchHeight / 2f, standingCenter.z);
+            targetCenter = GetCrouchCenter();
         }
 
         // Apply slide or normal movement
@@ -353,38 +384,49 @@ public class PlayerMovement : MonoBehaviour
         if (isSliding)
         {
             // Player retains limited control during slide (adds to slideVelocity)
-            Vector3 inputContribution = moveDirection * baseMoveSpeed * controlDuringSlide;
+            Vector3 inputContribution = Vector3.ProjectOnPlane(moveDirection, groundNormal) * moveSpeed * controlDuringSlide;
+            bool onSlope = groundFound && downhill.sqrMagnitude > 0.001f;
+            bool movingUphill = onSlope && Vector3.Dot(slideVelocity, downhill) < -0.05f;
+            if (groundFound) slideGroundGraceTimer = slideGroundGraceTime;
+            else slideGroundGraceTimer -= deltaTime;
 
-            // If forward sample indicates downhill, accelerate along downhill direction so slide continues down
-            if (downhill.sqrMagnitude > 0.001f)
+            slideVelocity = Vector3.ProjectOnPlane(slideVelocity, groundFound ? groundNormal : Vector3.up);
+            if (onSlope)
             {
-                slideVelocity += downhill * slopeSlideAcceleration * Time.deltaTime;
-                slideVelocity = Vector3.ProjectOnPlane(slideVelocity, groundNormal);
-
-                // avoid giving slide an uphill component
-                float dot = Vector3.Dot(slideVelocity, downhill);
-                if (dot < 0f)
-                    slideVelocity -= downhill * dot;
-            }
-            else
-            {
-                // even without downhill, keep movement projected to ground to avoid climbing tiny bumps
-                slideVelocity = Vector3.ProjectOnPlane(slideVelocity, Vector3.up);
+                float slopeStrength = Mathf.Clamp01(Mathf.Sin(slopeAngle * Mathf.Deg2Rad) / Mathf.Sin(45f * Mathf.Deg2Rad));
+                slideVelocity += downhill * slopeSlideAcceleration * slopeStrength * deltaTime;
             }
 
+            float frictionMultiplier = movingUphill ? uphillFrictionMultiplier : (onSlope ? downhillFrictionMultiplier : 1f);
+            float friction = slideFriction * frictionMultiplier;
+            if (onSlope && !movingUphill)
+            {
+                float downhillAcceleration = slopeSlideAcceleration * Mathf.Clamp01(Mathf.Sin(slopeAngle * Mathf.Deg2Rad) / Mathf.Sin(45f * Mathf.Deg2Rad));
+                friction = Mathf.Min(friction, downhillAcceleration * 0.5f);
+            }
+            slideVelocity = Vector3.MoveTowards(slideVelocity, Vector3.zero, friction * deltaTime);
+            slideVelocity = Vector3.ClampMagnitude(slideVelocity, moveSpeed * sprintMultiplier * maxSlideSpeedMultiplier);
+
+            // Steering may turn a slide sideways, but cannot drive it back up the hill.
+            if (onSlope)
+            {
+                float steeringDownhill = Vector3.Dot(inputContribution, downhill);
+                if (steeringDownhill < 0f) inputContribution -= downhill * steeringDownhill;
+            }
             horizontalMove = slideVelocity + inputContribution;
-
-            // strong-push phase timer
-            slideTimer -= Time.deltaTime;
-            if (slideTimer <= 0f || !isGrounded)
+            slideTimer -= deltaTime;
+            bool downhillSlide = onSlope && !movingUphill && Vector3.Dot(slideVelocity, downhill) > 0.05f;
+            bool uphillStopped = movingUphill && (slideVelocity.magnitude < 0.2f || Vector3.Dot(slideVelocity, downhill) >= 0f);
+            if (slideGroundGraceTimer <= 0f || uphillStopped || (!downhillSlide && slideTimer <= 0f))
             {
-                // exit strong push phase; start cooldown
                 isSliding = false;
                 slideCooldownTimer = slideCooldown;
+                if (uphillStopped)
+                {
+                    slideVelocity = Vector3.zero;
+                    horizontalMove = Vector3.zero;
+                }
             }
-
-            // decay slide impulse due to friction every frame
-            slideVelocity = Vector3.MoveTowards(slideVelocity, Vector3.zero, slideFriction * Time.deltaTime);
         }
         else
         {
@@ -393,24 +435,20 @@ public class PlayerMovement : MonoBehaviour
 
             if (moveDirection.sqrMagnitude > 0.001f && downhill.sqrMagnitude > 0.001f)
             {
-                Vector3 moveDirNorm = moveDirection.normalized;
+                Vector3 moveDirNorm = Vector3.ProjectOnPlane(moveDirection, groundNormal).normalized;
                 float slopeDot = Vector3.Dot(moveDirNorm, downhill); // +1 when moving downhill, -1 uphill
-                float speedAdjustment = 1f + slopeDot * slopeSpeedFactor;
+                float slopeStrength = Mathf.Clamp01(Mathf.Sin(slopeAngle * Mathf.Deg2Rad) / Mathf.Sin(45f * Mathf.Deg2Rad));
+                float speedAdjustment = 1f + slopeDot * slopeSpeedFactor * slopeStrength;
                 speedAdjustment = Mathf.Clamp(speedAdjustment, minSlopeSpeedMultiplier, maxSlopeSpeedMultiplier);
                 inputMove *= speedAdjustment;
             }
 
-            // residual slide momentum still applies
+            if (groundFound && slopeAngle <= controller.slopeLimit)
+                inputMove = Vector3.ProjectOnPlane(inputMove, groundNormal).normalized * inputMove.magnitude;
+
+            // After reaching flat ground, the remaining momentum comes to rest.
+            slideVelocity = Vector3.MoveTowards(slideVelocity, Vector3.zero, slideFriction * deltaTime);
             horizontalMove = inputMove + slideVelocity;
-
-            // slope influence for residual momentum
-            if (downhill.sqrMagnitude > 0.001f && slideVelocity.sqrMagnitude > 0.001f)
-            {
-                slideVelocity += downhill * slopeSlideAcceleration * Time.deltaTime;
-                slideVelocity = Vector3.ProjectOnPlane(slideVelocity, groundNormal);
-            }
-
-            slideVelocity = Vector3.MoveTowards(slideVelocity, Vector3.zero, slideFriction * Time.deltaTime);
 
             // If slideVelocity is nearly zero, clear it to avoid tiny drift
             if (slideVelocity.sqrMagnitude < 0.01f)
@@ -426,6 +464,12 @@ public class PlayerMovement : MonoBehaviour
         }
 
         return horizontalMove;
+    }
+
+    private Vector3 GetCrouchCenter()
+    {
+        // Preserve the feet even when the standing capsule is centered at the origin.
+        return standingCenter + Vector3.down * ((standingHeight - crouchHeight) * 0.5f);
     }
 
     // Editor gizmos to visualize ground sampling used for sliding (center + forward)

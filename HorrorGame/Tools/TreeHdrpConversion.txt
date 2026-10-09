@@ -1,0 +1,4 @@
+PASS: Assets/Tree_HDRP/Tree_HDRP.prefab
+Mesh: 5021 vertices, 2 submeshes; original geometry preserved.
+HDRP/Lit bark and double-sided alpha-clipped leaves.
+Original Tree Creator object retained, inactive.

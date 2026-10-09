@@ -1,0 +1,5 @@
+PASS: real CharacterController on a 30-degree ramp, using the active scene player's settings.
+Walking: downhill 7.12 m/s; uphill 3.00 m/s; flat baseline 5 m/s.
+Downhill: slide continued for 3 seconds without input; peak 20.00 m/s; horizontal distance 45.99 m.
+Flat: slide ended and momentum decayed to zero.
+Uphill: slide ended within 0.5 seconds; uphill distance 0.14 m.

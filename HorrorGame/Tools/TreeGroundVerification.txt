@@ -1,0 +1,2 @@
+PASS: 1 scene trees: leaf vertices move; bark stays fixed.
+1 terrains use soil base texture on a copied TerrainData, retaining height, trees and details.

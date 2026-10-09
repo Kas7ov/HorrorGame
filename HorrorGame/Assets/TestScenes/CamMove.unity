@@ -2611,6 +2611,11 @@ MonoBehaviour:
   slideCooldown: 1.2
   slopeSlideThresholdAngle: 5
   slopeSlideAcceleration: 9
+  downhillFrictionMultiplier: 0.12
+  uphillFrictionMultiplier: 2.5
+  uphillSlideMultiplier: 0.35
+  maxSlideSpeedMultiplier: 2.5
+  slideGroundGraceTime: 0.12
   groundRaycastExtra: 45
   forwardSlopeCheckDistance: 0.6
   forwardSampleUp: 0.3

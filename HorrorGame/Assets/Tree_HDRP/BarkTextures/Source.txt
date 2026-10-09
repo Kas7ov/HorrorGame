@@ -1,0 +1,4 @@
+Bark Brown 02 — Rob Tuytel / Poly Haven. CC0.
+https://polyhaven.com/a/bark_brown_02
+2K diffuse, OpenGL normal, ambient occlusion and roughness maps.
+HDRP mask generated as R=0 metallic, G=AO, B=1 detail, A=1-roughness.
